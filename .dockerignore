@@ -1,0 +1,23 @@
+
+# Keep local credentials, caches and old executables out of build contexts.
+.git
+.agents
+.codex_tmp
+.env
+.env.*
+**/.env
+**/.env.*
+**/node_modules
+**/.venv
+**/venv
+**/__pycache__
+build
+dist
+data
+logs
+*.log
+*.key
+*.pem
+/cursor2api-go-bin-new
+/cursor2api-go
+/cursor2api-go-bin
