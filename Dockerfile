@@ -1,5 +1,8 @@
 # ---- Builder stage ----
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26.10-alpine@sha256:5cb67f19c5e7994dcb80c074f7cfca8aeeada45bbdca035f73df269cefdcce61 AS builder
+
+COPY scripts/security-ca.sh /usr/local/bin/security-ca
+RUN apk add --no-cache 'ca-certificates>=20261020-r0' openssl && sh /usr/local/bin/security-ca
 
 WORKDIR /src
 
@@ -18,9 +21,12 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -o /out/cursor2api-go .
 
 # ---- Runtime stage ----
-FROM alpine:3.21
+FROM node:22.23.4-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
 
-RUN apk --no-cache add ca-certificates nodejs
+COPY scripts/security-ca.sh /usr/local/bin/security-ca
+RUN apk add --no-cache 'ca-certificates>=20261020-r0' openssl && sh /usr/local/bin/security-ca
+
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
 

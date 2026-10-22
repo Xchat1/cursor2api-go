@@ -3,6 +3,7 @@
 #  Cursor2API启动脚本
 
 set -e
+export GOTOOLCHAIN=go1.26.10
 
 # 定义颜色代码
 RED='\033[0;31m'
@@ -25,13 +26,13 @@ print_header() {
 # 检查Go环境
 check_go() {
     if ! command -v go &> /dev/null; then
-        echo -e "${RED}❌ Go 未安装，请先安装 Go 1.21 或更高版本${NC}"
+        echo -e "${RED}❌ Go 未安装，请先安装 Go 1.26.10 或已修复的更新版本${NC}"
         echo -e "${YELLOW}💡 安装方法: https://golang.org/dl/${NC}"
         exit 1
     fi
 
     GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
-    REQUIRED_VERSION="1.24"
+    REQUIRED_VERSION="1.26.10"
 
     if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$GO_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
         echo -e "${RED}❌ Go 版本 $GO_VERSION 过低，请安装 Go $REQUIRED_VERSION 或更高版本${NC}"
@@ -44,18 +45,13 @@ check_go() {
 # 检查Node.js环境
 check_nodejs() {
     if ! command -v node &> /dev/null; then
-        echo -e "${RED}❌ Node.js 未安装，请先安装 Node.js 18 或更高版本${NC}"
+        echo -e "${RED}❌ Node.js 未安装，请先安装 Node.js 22.23.4 / 24.22.1 / 26.12.1 或相应安全补丁${NC}"
         echo -e "${YELLOW}💡 安装方法: https://nodejs.org/${NC}"
         exit 1
     fi
 
     NODE_VERSION=$(node --version | sed 's/v//')
-    REQUIRED_VERSION="18.0.0"
-
-    if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$NODE_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
-        echo -e "${RED}❌ Node.js 版本 $NODE_VERSION 过低，请安装 Node.js $REQUIRED_VERSION 或更高版本${NC}"
-        exit 1
-    fi
+    node "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/check-node.cjs"
 
     echo -e "${GREEN}✅ Node.js 版本检查通过: $NODE_VERSION${NC}"
 }
@@ -90,10 +86,10 @@ EOF
 # 构建应用
 build_app() {
     echo -e "${BLUE}📦 正在下载 Go 依赖...${NC}"
-    go mod download
+    GOTOOLCHAIN=go1.26.10 go mod download
 
     echo -e "${BLUE}🔨 正在编译 Go 应用...${NC}"
-    go build -o cursor2api-go .
+    GOTOOLCHAIN=go1.26.10 go build -o cursor2api-go .
 
     if [ ! -f cursor2api-go ]; then
         echo -e "${RED}❌ 编译失败！${NC}"
